@@ -7,16 +7,31 @@ requires-python = ">=3.11,<3.14"
 dependencies = [
     "jax>=0.4.30",
     "jaxlib>=0.4.30",
-    "mlx>=0.20.0",
     "numpy>=1.26.0",
     "matplotlib>=3.8.0",
     "marimo>=0.9.0",
 ]
 
 [project.optional-dependencies]
+mlx = [
+    "mlx>=0.20.0",  # Apple Silicon only
+]
 dev = [
     "pytest>=8.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-benchmark>=4.0.0",
+    "pytest-timeout>=2.0.0",
+    "pytest-xdist>=3.5.0",
+    "hypothesis>=6.100.0",
     "ruff>=0.6.0",
+]
+docs = [
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings[python]>=0.24.0",
+]
+all = [
+    "attn-tensors[mlx,dev,docs]",
 ]
 
 [build-system]
@@ -32,3 +47,26 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "benchmark: marks benchmark tests",
+]
+timeout = 120
+
+[tool.coverage.run]
+source = ["src/attn_tensors"]
+branch = true
+parallel = true
+
+[tool.coverage.report]
+fail_under = 80
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "except ImportError:",
+]

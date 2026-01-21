@@ -83,3 +83,4 @@ pip-log.txt
 # Compiled Typst (keep post.pdf in repo as artifact)
 # Uncomment if you want to ignore PDF:
 # *.pdf
+.hypothesis/
