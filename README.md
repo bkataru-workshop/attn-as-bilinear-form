@@ -1,8 +1,8 @@
 # Attention as Bilinear Form
 
-[![Tests](https://github.com/bkataru-workshop/attn-as-bilinear-form/actions/workflows/test.yml/badge.svg)](https://github.com/bkataru-workshop/attn-as-bilinear-form/actions/workflows/test.yml)
-[![Deploy](https://github.com/bkataru-workshop/attn-as-bilinear-form/actions/workflows/deploy.yml/badge.svg)](https://github.com/bkataru-workshop/attn-as-bilinear-form/actions/workflows/deploy.yml)
-[![Documentation](https://img.shields.io/badge/docs-online-blue)](https://bkataru-workshop.github.io/attn-as-bilinear-form/)
+[![Tests](https://github.com/planckeon/attn-as-bilinear-form/actions/workflows/test.yml/badge.svg)](https://github.com/planckeon/attn-as-bilinear-form/actions/workflows/test.yml)
+[![Deploy](https://github.com/planckeon/attn-as-bilinear-form/actions/workflows/deploy.yml/badge.svg)](https://github.com/planckeon/attn-as-bilinear-form/actions/workflows/deploy.yml)
+[![Documentation](https://img.shields.io/badge/docs-online-blue)](https://planckeon.github.io/attn-as-bilinear-form/)
 
 A physicist's guide to transformer attention through tensor calculus, bilinear forms, and statistical mechanics.
 
@@ -17,26 +17,26 @@ This project recasts the attention mechanism from transformers using the languag
 
 ## Documentation
 
-📚 **[Full Documentation](https://bkataru-workshop.github.io/attn-as-bilinear-form/)**
+📚 **[Full Documentation](https://planckeon.github.io/attn-as-bilinear-form/)**
 
 ### Theory Deep Dives
 
 | Topic | Description |
 |-------|-------------|
-| [Bilinear Forms](https://bkataru-workshop.github.io/attn-as-bilinear-form/theory/bilinear/) | Metric tensors, index notation, Riemannian structure |
-| [Einsum Notation](https://bkataru-workshop.github.io/attn-as-bilinear-form/theory/einsum/) | Einstein summation, tensor contractions, attention patterns |
-| [Attention Mechanism](https://bkataru-workshop.github.io/attn-as-bilinear-form/theory/attention/) | Step-by-step breakdown in index notation |
-| [Gradient Derivations](https://bkataru-workshop.github.io/attn-as-bilinear-form/theory/gradients/) | Full backprop derivation, softmax Jacobian |
-| [Statistical Mechanics](https://bkataru-workshop.github.io/attn-as-bilinear-form/theory/statistical/) | Gibbs distribution, entropy, Hopfield networks |
-| [Multi-Head Attention](https://bkataru-workshop.github.io/attn-as-bilinear-form/theory/multihead/) | Head projections, parameter gradients |
-| [Positional Encodings](https://bkataru-workshop.github.io/attn-as-bilinear-form/theory/positional/) | RoPE, ALiBi, relative encodings |
-| [Efficient Attention](https://bkataru-workshop.github.io/attn-as-bilinear-form/theory/efficient/) | Flash Attention, sparse patterns, linear attention |
+| [Bilinear Forms](https://planckeon.github.io/attn-as-bilinear-form/theory/bilinear/) | Metric tensors, index notation, Riemannian structure |
+| [Einsum Notation](https://planckeon.github.io/attn-as-bilinear-form/theory/einsum/) | Einstein summation, tensor contractions, attention patterns |
+| [Attention Mechanism](https://planckeon.github.io/attn-as-bilinear-form/theory/attention/) | Step-by-step breakdown in index notation |
+| [Gradient Derivations](https://planckeon.github.io/attn-as-bilinear-form/theory/gradients/) | Full backprop derivation, softmax Jacobian |
+| [Statistical Mechanics](https://planckeon.github.io/attn-as-bilinear-form/theory/statistical/) | Gibbs distribution, entropy, Hopfield networks |
+| [Multi-Head Attention](https://planckeon.github.io/attn-as-bilinear-form/theory/multihead/) | Head projections, parameter gradients |
+| [Positional Encodings](https://planckeon.github.io/attn-as-bilinear-form/theory/positional/) | RoPE, ALiBi, relative encodings |
+| [Efficient Attention](https://planckeon.github.io/attn-as-bilinear-form/theory/efficient/) | Flash Attention, sparse patterns, linear attention |
 
 ## Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/bkataru-workshop/attn-as-bilinear-form
+git clone https://github.com/planckeon/attn-as-bilinear-form
 cd attn-as-bilinear-form
 
 # Install with uv (recommended)
