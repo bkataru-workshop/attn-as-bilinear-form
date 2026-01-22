@@ -343,7 +343,7 @@ Try to write einsum strings for these operations:
 1. **Column-wise sum**: $s_j = \sum_i A_{ij}$
 2. **Row-wise mean**: $m_i = \frac{1}{n} \sum_j A_{ij}$ (hint: einsum + divide)
 3. **Frobenius norm squared**: $\|A\|_F^2 = \sum_{i,j} A_{ij}^2$ (hint: square first)
-4. **Bilinear form**: $B(u,v) = \sum_{a,b} u^a g_{ab} v^b$
+4. **Bilinear form**: $B(u,v) = u^a g_{ab} v^b$
 5. **Batch outer product**: $C_{bij} = a_{bi} b_{bj}$
 
 <details>
