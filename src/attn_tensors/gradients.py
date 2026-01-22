@@ -16,7 +16,6 @@ Index conventions:
     k, l: general indices in gradient expressions
 """
 
-
 import jax
 import jax.numpy as jnp
 from jax import Array
