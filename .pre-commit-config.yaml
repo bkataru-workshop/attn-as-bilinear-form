@@ -25,7 +25,7 @@ repos:
 
       - id: vale
         name: vale prose linter
-        entry: vale
+        entry: bash -c 'if [ ! -d ".vale/styles/Google" ]; then vale sync; fi && vale "$@"' --
         language: system
         files: '\.(md|typ)$'
         pass_filenames: true
