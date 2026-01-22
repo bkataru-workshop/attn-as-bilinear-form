@@ -213,7 +213,7 @@ def attention_as_hopfield(
     """
     d = queries.shape[-1]
     if beta is None:
-        beta = 1.0 / jnp.sqrt(d)
+        beta = float(1.0 / jnp.sqrt(d))
 
     # Similarities
     scores = jnp.einsum("qa,ka->qk", queries, keys) * beta
@@ -264,7 +264,7 @@ def modern_capacity(d: int, epsilon: float = 0.01) -> float:
     """
     # From Ramsauer et al., 2020: M = O(d^(d/2))
     # Simplified exponential approximation
-    return jnp.exp(0.5 * d)
+    return float(jnp.exp(0.5 * d))
 
 
 def separation_quality(patterns: Array) -> float:
@@ -287,7 +287,7 @@ def separation_quality(patterns: Array) -> float:
     distances = jnp.sqrt(jnp.sum(diff**2, axis=-1))  # (M, M)
 
     # Mask diagonal (self-distance) - use where to avoid inf * 0 = nan
-    diagonal_mask = jnp.eye(M, dtype=bool)
+    diagonal_mask = jnp.eye(M, dtype=jnp.bool_)
     distances = jnp.where(diagonal_mask, jnp.inf, distances)
 
     min_distance = jnp.min(distances)

@@ -27,7 +27,7 @@ from functools import partial
 # =============================================================================
 
 
-def grad_scores_wrt_Q(dL_dS: Array, K: Array, scale: float) -> Array:
+def grad_scores_wrt_Q(dL_dS: Array, K: Array, scale: float | Array) -> Array:
     """
     Gradient of loss w.r.t. queries, given gradient w.r.t. scores.
 
@@ -55,7 +55,7 @@ def grad_scores_wrt_Q(dL_dS: Array, K: Array, scale: float) -> Array:
     return scale * jnp.einsum("ij,jl->il", dL_dS, K)
 
 
-def grad_scores_wrt_K(dL_dS: Array, Q: Array, scale: float) -> Array:
+def grad_scores_wrt_K(dL_dS: Array, Q: Array, scale: float | Array) -> Array:
     """
     Gradient of loss w.r.t. keys, given gradient w.r.t. scores.
 
@@ -275,8 +275,9 @@ def verify_gradients(
     O = jnp.einsum("ij,jb->ib", A, V)
 
     # Simple loss: L = ||O||^2 / 2
-    def loss_fn(Q, K, V):
+    def loss_fn(Q: Array, K: Array, V: Array) -> Array:
         O = scaled_dot_product_attention(Q, K, V)
+        assert isinstance(O, Array)  # return_weights=False
         return 0.5 * jnp.sum(O**2)
 
     # Get JAX gradients
@@ -303,7 +304,7 @@ def gradient_numerical_check(
     K: Array,
     V: Array,
     eps: float = 1e-5,
-) -> dict[str, Array]:
+) -> dict[str, Array | float]:
     """
     Numerical gradient check using finite differences.
 
@@ -323,8 +324,9 @@ def gradient_numerical_check(
     """
     from .attention import scaled_dot_product_attention
 
-    def loss_fn(Q, K, V):
+    def loss_fn(Q: Array, K: Array, V: Array) -> Array:
         O = scaled_dot_product_attention(Q, K, V)
+        assert isinstance(O, Array)  # return_weights=False
         return 0.5 * jnp.sum(O**2)
 
     # Numerical gradient for Q
@@ -355,11 +357,14 @@ def gradient_numerical_check(
 # =============================================================================
 
 
+from typing import Any
+
+
 def gradient_flow_analysis(
     Q: Array,
     K: Array,
     V: Array,
-) -> dict[str, Array]:
+) -> dict[str, Any]:
     """
     Analyze gradient flow through attention for understanding.
 

@@ -39,7 +39,7 @@ def causal_mask(n: int) -> Array:
     Returns:
         Boolean mask of shape (n, n)
     """
-    return jnp.tril(jnp.ones((n, n), dtype=bool))
+    return jnp.tril(jnp.ones((n, n), dtype=jnp.bool_))
 
 
 def causal_mask_with_window(n: int, window: int) -> Array:
@@ -233,7 +233,7 @@ def global_local_mask(n: int, window: int, global_tokens: int) -> Array:
     local = local_attention_mask(n, window)
 
     # Global tokens can attend everywhere
-    global_mask = jnp.zeros((n, n), dtype=bool)
+    global_mask = jnp.zeros((n, n), dtype=jnp.bool_)
     global_mask = global_mask.at[:global_tokens, :].set(True)  # Global rows
     global_mask = global_mask.at[:, :global_tokens].set(True)  # Global cols
 

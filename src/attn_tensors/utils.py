@@ -12,6 +12,7 @@ import jax.numpy as jnp
 from jax import Array
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+from matplotlib.figure import Figure, SubFigure
 from typing import Sequence
 
 
@@ -28,7 +29,7 @@ def plot_attention_weights(
     cmap: str = "Blues",
     figsize: tuple[int, int] = (8, 6),
     ax: plt.Axes | None = None,
-) -> plt.Figure:
+) -> Figure | SubFigure:
     """
     Plot attention weights as a heatmap.
 
@@ -82,7 +83,7 @@ def plot_multihead_attention(
     A: Array,
     head_names: Sequence[str] | None = None,
     figsize: tuple[int, int] | None = None,
-) -> plt.Figure:
+) -> Figure | SubFigure:
     """
     Plot attention weights for all heads.
 
@@ -125,7 +126,7 @@ def plot_entropy_distribution(
     A: Array,
     title: str = "Attention Entropy Distribution",
     figsize: tuple[int, int] = (8, 5),
-) -> plt.Figure:
+) -> Figure | SubFigure:
     """
     Plot distribution of attention entropy across queries.
 
@@ -173,7 +174,7 @@ def plot_temperature_sweep(
     scores: Array,
     temperatures: Array | None = None,
     figsize: tuple[int, int] = (10, 4),
-) -> plt.Figure:
+) -> Figure | SubFigure:
     """
     Visualize how attention weights change with temperature.
 
@@ -228,7 +229,7 @@ def plot_temperature_sweep(
 def plot_gradient_flow(
     flow_data: dict[str, Array],
     figsize: tuple[int, int] = (12, 4),
-) -> plt.Figure:
+) -> Figure | SubFigure:
     """
     Visualize gradient flow through attention.
 
@@ -276,7 +277,7 @@ def plot_mask(
     mask: Array,
     title: str = "Attention Mask",
     figsize: tuple[int, int] = (6, 6),
-) -> plt.Figure:
+) -> Figure | SubFigure:
     """
     Visualize an attention mask.
 
@@ -311,7 +312,7 @@ def plot_hopfield_energy(
     patterns: Array,
     state_trajectory: list[Array] | None = None,
     figsize: tuple[int, int] = (10, 4),
-) -> plt.Figure:
+) -> Figure | SubFigure:
     """
     Visualize Hopfield network energy landscape (2D projection).
 
@@ -377,7 +378,7 @@ def compare_metrics(
     K: Array,
     metrics: dict[str, Array],
     figsize: tuple[int, int] | None = None,
-) -> plt.Figure:
+) -> Figure | SubFigure:
     """
     Compare attention scores under different metrics.
 

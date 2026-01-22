@@ -54,7 +54,7 @@ def scaled_euclidean_metric(d: int, scale: float | None = None) -> Array:
         Scaled identity matrix of shape (d, d)
     """
     if scale is None:
-        scale = 1.0 / jnp.sqrt(d)
+        scale = float(1.0 / jnp.sqrt(d))
     return scale * jnp.eye(d)
 
 

@@ -267,6 +267,9 @@ def head_attention_entropy(A: Array) -> Array:
     return jnp.mean(H_per_query, axis=-1)  # (H,)
 
 
+from typing import Any
+
+
 def decompose_multihead(
     Q: Array,
     K: Array,
@@ -275,7 +278,7 @@ def decompose_multihead(
     W_K: Array,
     W_V: Array,
     W_O: Array,
-) -> dict[str, Array]:
+) -> dict[str, Any]:
     """
     Decompose multi-head attention for analysis.
 
