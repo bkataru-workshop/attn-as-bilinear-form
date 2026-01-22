@@ -23,6 +23,13 @@ repos:
         pass_filenames: false
         stages: [pre-push]
 
+      - id: vale
+        name: vale prose linter
+        entry: bash -c 'if [ ! -d ".vale/styles/Google" ]; then vale sync; fi && vale "$@"' --
+        language: system
+        files: '\.(md|typ)$'
+        pass_filenames: true
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
