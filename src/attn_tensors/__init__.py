@@ -37,6 +37,15 @@ from attn_tensors.bilinear import (
     verify_metric_properties,
 )
 
+# Einsum utilities
+from attn_tensors.einsum import (
+    EINSUM_EXAMPLES,
+    attention_output_einsum,
+    attention_scores_einsum,
+    explain_einsum,
+    parse_einsum,
+)
+
 # Masking utilities
 from attn_tensors.masking import (
     apply_mask,
@@ -99,4 +108,10 @@ __all__ = [
     # Multi-head
     "multihead_attention",
     "multihead_attention_batched",
+    # Einsum
+    "attention_scores_einsum",
+    "attention_output_einsum",
+    "parse_einsum",
+    "explain_einsum",
+    "EINSUM_EXAMPLES",
 ]

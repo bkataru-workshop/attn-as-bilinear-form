@@ -300,6 +300,97 @@ where the metric $g_(a b)$ encodes how we measure similarity in feature space.
   The scaling $1/sqrt(d_k)$ has a statistical interpretation: if $q^a$ and $k^a$ are i.i.d. with zero mean and unit variance, then $"Var"(q^a k_a) = d_k$. The scaling normalizes the variance to 1, keeping the softmax in a good operating regime. This is the "variance explosion" problem that the $sqrt(d_k)$ scaling solves.
 ]
 
+== Einstein Summation (Einsum)
+
+Now that we've introduced index notation, let's talk about how to implement it in code. The `einsum` function, available in NumPy, JAX, PyTorch, and other libraries, directly translates index notation to efficient tensor operations.
+
+#definition(name: "Einstein Summation Convention")[
+  In the *Einstein summation convention*, repeated indices are implicitly summed:
+  
+  $ C^(i k) = A^(i j) B_j^(space k) quad arrow.l.r.double quad C_(i k) = sum_j A_(i j) B_(j k) $
+  
+  In code: `C = einsum('ij,jk->ik', A, B)`
+]
+
+The einsum string has a simple grammar:
+
+- *Input specification* (left of `→`): Comma-separated indices for each input tensor
+- *Output specification* (right of `→`): Indices in the output
+- *Repeated indices* not in output are summed over
+
+#intuition[
+  Think of einsum indices as a way to label the dimensions of tensors. When the same label appears in multiple places, those dimensions are "paired up" for multiplication. When a label is missing from the output, that dimension is summed over.
+]
+
+#example(name: "Basic Einsum Patterns")[
+  Common operations in einsum:
+  
+  #table(
+    columns: (1fr, 1fr, 1fr),
+    align: (left, left, left),
+    stroke: 0.5pt,
+    inset: 5pt,
+    [*Operation*], [*Einsum*], [*Index Notation*],
+    [Dot product], [`'a,a->'`], [$s = u^a v_a$],
+    [Outer product], [`'a,b->ab'`], [$M_(a b) = u_a v_b$],
+    [Matrix multiply], [`'ij,jk->ik'`], [$C^(i k) = A^(i j) B_j^(space k)$],
+    [Transpose], [`'ij->ji'`], [$B_(j i) = A_(i j)$],
+    [Trace], [`'ii->'`], [$s = A^i_i$],
+    [Batch matmul], [`'bij,bjk->bik'`], [$C^(b i k) = A^(b i j) B^(b)_j^(space k)$],
+  )
+]
+
+=== Einsum for Attention
+
+The attention mechanism maps beautifully to einsum. Here are the key operations:
+
+*Attention scores* (query-key dot product):
+$ S^(i j) = Q^(i a) K^(j a) \/ sqrt(d_k) $
+
+```python
+S = einsum('ia,ja->ij', Q, K) / jnp.sqrt(d_k)
+```
+
+*Attention output* (weighted sum of values):
+$ O^(i b) = A^(i j) V^(j b) $
+
+```python
+O = einsum('ij,jb->ib', A, V)
+```
+
+*With bilinear metric*:
+$ S^(i j) = Q^(i a) g_(a b) K^(j b) $
+
+```python
+S = einsum('ia,ab,jb->ij', Q, g, K)
+```
+
+=== Multi-Head Einsum
+
+Multi-head attention adds a head index $h$:
+
+```python
+# Project to per-head queries: X^{hia} = X^{id} W_Q^{hda}
+Q_h = einsum('id,hda->hia', X, W_Q)
+
+# Per-head attention scores: S^{hij} = Q^{hia} K^{hja} / sqrt(d_k)
+S = einsum('hia,hja->hij', Q_h, K_h) / jnp.sqrt(d_k)
+
+# Per-head outputs: O^{hic} = A^{hij} V^{hjc}
+O = einsum('hij,hjc->hic', A, V_h)
+
+# Combine heads: Y^{id} = O^{hic} W_O^{hcd}
+Y = einsum('hic,hcd->id', O, W_O)
+```
+
+#intuition[
+  Einsum makes the summation indices explicit. When you see `'hia,hja->hij'`, you immediately know that `a` (the feature dimension) is being summed over, while `h`, `i`, `j` are preserved. This is exactly what the index notation tells us: $S^(h i j) = sum_a Q^(h i a) K^(h j a)$.
+]
+
+#remark[
+  Einsum is not just notation---it's often faster than explicit loops and reshapes because it avoids creating intermediate arrays. The library can optimize the contraction order and fuse operations. For more on einsum, see Sankalp's excellent tutorial "Shape Rotation 101" @sankalp2024.
+]
+
 #pagebreak()
 
 = Part II: The Attention Mechanism
@@ -1050,6 +1141,7 @@ All derivations in this document have been verified against JAX autodiff. The co
 attn_tensors/
 ├── attention.py    # Core attention operations
 ├── bilinear.py     # Metric tensors and bilinear forms
+├── einsum.py       # Einstein summation utilities
 ├── gradients.py    # Manual gradient implementations
 ├── softmax.py      # Temperature, entropy, Gibbs
 ├── multihead.py    # Multi-head attention
@@ -1120,6 +1212,11 @@ For those who want to dive deeper:
 *Code and Documentation:*
 - GitHub: https://github.com/bkataru-workshop/attn-as-bilinear-form
 - Documentation: https://bkataru-workshop.github.io/attn-as-bilinear-form/
+
+*Einsum Resources:*
+- Sankalp, "Shape Rotation 101: An Intro to Einsum and Jax Transformers" - Excellent practical einsum tutorial
+- Alex Riley, "A basic introduction to NumPy's einsum" - Clear einsum fundamentals
+- Tim Rocktäschel, "Einstein Summation in Numpy" - Einsum internals
 
 #pagebreak()
 

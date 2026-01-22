@@ -106,6 +106,81 @@ where the metric $g_{ab}$ encodes how we measure similarity in feature space.
 
 **Remark**: The $1/\sqrt{d_k}$ scaling has a statistical interpretation: if $q^a$ and $k^a$ are i.i.d. with zero mean and unit variance, then $\text{Var}(q^a k_a) = d_k$. The scaling normalizes the variance to 1.
 
+### Einstein Summation (Einsum)
+
+Now that we've introduced index notation, let's talk about how to implement it in code. The `einsum` function, available in NumPy, JAX, PyTorch, and other libraries, directly translates index notation to efficient tensor operations.
+
+**Definition (Einstein Summation Convention)**: In the Einstein summation convention, repeated indices are implicitly summed:
+
+$$C^{ik} = A^{ij} B_j^{\ k} \quad \Leftrightarrow \quad C_{ik} = \sum_j A_{ij} B_{jk}$$
+
+In code: `C = einsum('ij,jk->ik', A, B)`
+
+The einsum string has a simple grammar:
+- **Input specification** (left of →): Comma-separated indices for each input tensor
+- **Output specification** (right of →): Indices in the output
+- **Repeated indices** not in output are summed over
+
+**Intuition**: Think of einsum indices as labels for tensor dimensions. When the same label appears in multiple places, those dimensions are "paired up" for multiplication. When a label is missing from the output, that dimension is summed over.
+
+**Common Einsum Patterns**:
+
+| Operation | Einsum | Index Notation |
+|-----------|--------|----------------|
+| Dot product | `'a,a->'` | $s = u^a v_a$ |
+| Outer product | `'a,b->ab'` | $M_{ab} = u_a v_b$ |
+| Matrix multiply | `'ij,jk->ik'` | $C^{ik} = A^{ij} B_j^{\ k}$ |
+| Transpose | `'ij->ji'` | $B_{ji} = A_{ij}$ |
+| Trace | `'ii->'` | $s = A^i_i$ |
+| Batch matmul | `'bij,bjk->bik'` | $C^{bik} = A^{bij} B^b_j^{\ k}$ |
+
+#### Einsum for Attention
+
+The attention mechanism maps beautifully to einsum:
+
+**Attention scores** (query-key dot product):
+$$S^{ij} = Q^{ia} K^{ja} / \sqrt{d_k}$$
+
+```python
+S = einsum('ia,ja->ij', Q, K) / jnp.sqrt(d_k)
+```
+
+**Attention output** (weighted sum of values):
+$$O^{ib} = A^{ij} V^{jb}$$
+
+```python
+O = einsum('ij,jb->ib', A, V)
+```
+
+**With bilinear metric**:
+$$S^{ij} = Q^{ia} g_{ab} K^{jb}$$
+
+```python
+S = einsum('ia,ab,jb->ij', Q, g, K)
+```
+
+#### Multi-Head Einsum
+
+Multi-head attention adds a head index $h$:
+
+```python
+# Project to per-head queries: X^{hia} = X^{id} W_Q^{hda}
+Q_h = einsum('id,hda->hia', X, W_Q)
+
+# Per-head attention scores: S^{hij} = Q^{hia} K^{hja} / sqrt(d_k)
+S = einsum('hia,hja->hij', Q_h, K_h) / jnp.sqrt(d_k)
+
+# Per-head outputs: O^{hic} = A^{hij} V^{hjc}
+O = einsum('hij,hjc->hic', A, V_h)
+
+# Combine heads: Y^{id} = O^{hic} W_O^{hcd}
+Y = einsum('hic,hcd->id', O, W_O)
+```
+
+**Intuition**: Einsum makes the summation indices explicit. When you see `'hia,hja->hij'`, you immediately know that `a` (the feature dimension) is being summed over, while `h`, `i`, `j` are preserved.
+
+**Remark**: Einsum is not just notation—it's often faster than explicit loops and reshapes because it avoids creating intermediate arrays. For more on einsum, see Sankalp's excellent tutorial ["Shape Rotation 101"](https://sankalp.bearblog.dev/einsum-new/).
+
 ---
 
 ## Part II: The Attention Mechanism
@@ -492,6 +567,8 @@ print(results)  # {'dL_dQ': True, 'dL_dK': True, 'dL_dV': True, 'all_correct': T
 2. Ramsauer et al. (2020). *Hopfield Networks is All You Need*
 3. Dao et al. (2022). *FlashAttention: Fast and Memory-Efficient Exact Attention*
 4. Amari (1998). *Natural Gradient Works Efficiently in Learning*
+5. Sankalp (2024). [*Shape Rotation 101: An Intro to Einsum and Jax Transformers*](https://sankalp.bearblog.dev/einsum-new/)
+6. Alex Riley. [*A basic introduction to NumPy's einsum*](https://ajcr.net/Basic-guide-to-einsum/)
 
 ---
 
