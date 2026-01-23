@@ -90,7 +90,6 @@ class LatexLinter:
         # Find display math blocks ($$...$$)
         for match in re.finditer(r'\$\$(.*?)\$\$', content_no_code, re.DOTALL):
             # Get the position in the original content
-            start_in_cleaned = match.start()
             # We need to find this math block in the original content
             # For simplicity, we'll use the cleaned content for linting
             math_blocks.append((match.group(1), match.start(), match.end()))
