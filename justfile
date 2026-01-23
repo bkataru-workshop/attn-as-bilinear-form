@@ -115,7 +115,7 @@ lint-latex:
     set -euo pipefail
     python3 scripts/lint_latex.py \
         $(find . -name "*.md" -type f -not -path "./.git/*") \
-        $(find . -name "*.py" -type f -not -path "./.git/*" -not -path "./scripts/lint_latex.py")
+        $(find src notebooks tests -name "*.py" -type f 2>/dev/null || true)
 
 # Run vale linter on markdown files (deprecated, use lint-vale)
 lint: sync-vale

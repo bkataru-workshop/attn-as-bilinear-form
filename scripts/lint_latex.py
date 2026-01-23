@@ -112,11 +112,17 @@ class LatexLinter:
         # Get line number from cleaned content
         line_num = self._content_for_linting[:start_pos].count('\n') + 1
         
+        # Mapping of pattern types to validator functions
+        validators = {
+            'subscript': self._is_valid_subscript,
+            'superscript': self._is_valid_superscript
+        }
+        
         for pattern, error_msg, pattern_type in self.patterns:
             for match in re.finditer(pattern, math_content):
                 word = match.group(1)
                 # Check if this word needs \text{} wrapper based on pattern type
-                validator = self._is_valid_subscript if pattern_type == 'subscript' else self._is_valid_superscript
+                validator = validators[pattern_type]
                 if not validator(word):
                     self.errors.append({
                         'file': filepath,
@@ -138,7 +144,7 @@ class LatexLinter:
         for math_content, start_pos, _ in math_blocks:
             self.lint_math_block(math_content, start_pos, str(filepath))
         
-        return len([e for e in self.errors if e['file'] == str(filepath)])
+        return sum(1 for e in self.errors if e['file'] == str(filepath))
 
     def print_errors(self):
         """Print all errors found."""
@@ -169,11 +175,6 @@ def main():
         nargs='+',
         type=Path,
         help='Markdown or Python files to lint'
-    )
-    parser.add_argument(
-        '--fix',
-        action='store_true',
-        help='Automatically fix errors (not implemented yet)'
     )
     
     args = parser.parse_args()
