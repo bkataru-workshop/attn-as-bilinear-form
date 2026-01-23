@@ -105,23 +105,25 @@ class LatexLinter:
 
     def lint_math_block(self, math_content: str, start_pos: int, filepath: str):
         """Lint a single math block for errors."""
-        # Find the math block in the original content to get accurate line numbers
-        # Search for the math content in the original content
-        # We use the cleaned content position as a hint, but search in original
+        # Calculate line number by finding the math block in the original content
+        # We search for the math content to get accurate line numbers even when code blocks were removed
         
-        # For accuracy, we search for the complete math block pattern in original content
-        # This is an approximation - we look for the math content around the expected position
-        math_pattern = re.escape(math_content)
+        line_num = self._content_for_linting[:start_pos].count('\n') + 1  # Default fallback
         
-        # Try to find the math block in the original content
-        line_num = 1  # Default to line 1 if we can't find it
-        for match in re.finditer(r'\$\$?' + math_pattern + r'\$\$?', self._original_content, re.DOTALL):
-            line_num = self._original_content[:match.start()].count('\n') + 1
-            break
-        
-        # Fallback: if not found, use cleaned content line number (less accurate)
-        if line_num == 1 and start_pos > 0:
-            line_num = self._content_for_linting[:start_pos].count('\n') + 1
+        # Try to find this specific math block in the original content for accurate line numbers
+        # We look for the dollar-delimited math containing this content
+        try:
+            # Search for both inline ($...$) and display ($$...$$) math blocks
+            # containing this exact math content in the original file
+            escaped_content = re.escape(math_content)
+            # Match either $content$ or $$content$$
+            pattern = r'\$\$?' + escaped_content + r'\$\$?'
+            match = re.search(pattern, self._original_content, re.DOTALL)
+            if match:
+                line_num = self._original_content[:match.start()].count('\n') + 1
+        except (re.error, Exception):
+            # If regex fails (e.g., due to complex content), use fallback
+            pass
         
         # Mapping of pattern types to validator functions
         validators = {
