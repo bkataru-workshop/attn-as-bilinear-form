@@ -116,13 +116,14 @@ class LatexLinter:
             # Search for both inline ($...$) and display ($$...$$) math blocks
             # containing this exact math content in the original file
             escaped_content = re.escape(math_content)
-            # Match either $content$ or $$content$$
-            pattern = r'\$\$?' + escaped_content + r'\$\$?'
-            match = re.search(pattern, self._original_content, re.DOTALL)
-            if match:
-                line_num = self._original_content[:match.start()].count('\n') + 1
-        except (re.error, Exception):
-            # If regex fails (e.g., due to complex content), use fallback
+            # Try display math first ($$...$$), then inline math ($...$)
+            for delim in [r'\$\$' + escaped_content + r'\$\$', r'\$' + escaped_content + r'\$']:
+                match = re.search(delim, self._original_content, re.DOTALL)
+                if match:
+                    line_num = self._original_content[:match.start()].count('\n') + 1
+                    break
+        except re.error:
+            # If regex construction fails, use fallback
             pass
         
         # Mapping of pattern types to validator functions
