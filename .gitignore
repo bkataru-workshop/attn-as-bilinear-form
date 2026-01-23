@@ -90,3 +90,9 @@ site/public/
 
 # Vale styles (synced from packages)
 .vale/styles/
+
+# Vale binary (downloaded for linting)
+vale
+
+# Just binary (for testing)
+just
