@@ -20,18 +20,32 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 from lint_latex import LatexLinter
 
 
+@pytest.fixture
+def linter():
+    """Provide a fresh linter instance for each test."""
+    return LatexLinter()
+
+
+@pytest.fixture
+def temp_md_file():
+    """Create a temporary markdown file for testing."""
+    def _create_file(content):
+        f = tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False)
+        f.write(content)
+        f.flush()
+        f.close()
+        filepath = Path(f.name)
+        return filepath
+    return _create_file
+
+
 class TestLatexLinter:
     """Test suite for LaTeX linter."""
 
-    def test_detects_multi_letter_subscript(self):
+    def test_detects_multi_letter_subscript(self, linter, temp_md_file):
         """Test that multi-letter subscripts without \\text{} are detected."""
-        linter = LatexLinter()
         content = "$X_{Input}$"  # Mixed case should be caught
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
-            f.write(content)
-            f.flush()
-            filepath = Path(f.name)
+        filepath = temp_md_file(content)
         
         try:
             errors = linter.lint_file(filepath)
@@ -42,15 +56,10 @@ class TestLatexLinter:
         finally:
             filepath.unlink()
 
-    def test_detects_multi_letter_superscript(self):
+    def test_detects_multi_letter_superscript(self, linter, temp_md_file):
         """Test that multi-letter superscripts without \\text{} are detected."""
-        linter = LatexLinter()
         content = "$X^{ERROR}$"
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
-            f.write(content)
-            f.flush()
-            filepath = Path(f.name)
+        filepath = temp_md_file(content)
         
         try:
             errors = linter.lint_file(filepath)
@@ -140,22 +149,21 @@ class TestLatexLinter:
         finally:
             filepath.unlink()
 
-    def test_lowercase_words_allowed_for_tensor_notation(self):
-        """Test that all-lowercase words like 'input' and 'token' are allowed (tensor notation)."""
-        linter = LatexLinter()
-        # These are actually allowed because they're all lowercase (tensor indices)
-        # The original issue had these, but they should use \text{} for clarity
-        # However, the linter allows them as valid tensor notation
-        content = "$X_{input}$ and $Y_{token}$"
+    def test_lowercase_words_allowed_for_tensor_notation(self, linter, temp_md_file):
+        """Test that all-lowercase words are allowed as tensor notation.
         
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
-            f.write(content)
-            f.flush()
-            filepath = Path(f.name)
+        Note: While 'input' and 'token' were in the original issue and we fixed
+        them to use \\text{}, the linter allows all-lowercase multi-letter
+        combinations by design (e.g., 'ab', 'ij', 'hia') for tensor indices.
+        Words like 'input' happen to pass this rule but are semantically labels
+        that should ideally use \\text{} for clarity in documentation.
+        """
+        content = "$X_{input}$ and $Y_{token}$"
+        filepath = temp_md_file(content)
         
         try:
             errors = linter.lint_file(filepath)
-            # These are allowed by design (all lowercase = tensor notation)
+            # These pass because they're all lowercase (treated as tensor notation)
             assert errors == 0
         finally:
             filepath.unlink()
