@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-LaTeX/MathJax linter for markdown files.
+LaTeX/MathJax linter for markdown and Python files.
 
-This script checks for common LaTeX formatting errors in markdown files,
-particularly in inline math ($...$) and display math ($$...$$) blocks.
+This script checks for common LaTeX formatting errors in markdown files
+and Python docstrings, particularly in inline math ($...$) and display
+math ($$...$$) blocks.
 """
 
 import re
@@ -17,6 +18,7 @@ class LatexLinter:
 
     def __init__(self):
         self.errors = []
+        self._content_for_linting = ""  # Will store content with code blocks removed
         # Pattern to find multi-letter words in subscripts/superscripts
         # that should be wrapped in \text{} or similar commands
         self.patterns = [
@@ -76,25 +78,39 @@ class LatexLinter:
         return False
 
     def extract_math_blocks(self, content: str) -> List[Tuple[str, int, int]]:
-        """Extract all math blocks from markdown content."""
+        """Extract all math blocks from markdown content, excluding code blocks."""
+        # First, remove all code blocks to avoid false positives
+        # Remove fenced code blocks (```...```)
+        content_no_code = re.sub(r'```.*?```', '', content, flags=re.DOTALL)
+        # Remove inline code (`...`)
+        content_no_code = re.sub(r'`[^`]+`', '', content_no_code)
+        
         math_blocks = []
         
         # Find display math blocks ($$...$$)
-        for match in re.finditer(r'\$\$(.*?)\$\$', content, re.DOTALL):
+        for match in re.finditer(r'\$\$(.*?)\$\$', content_no_code, re.DOTALL):
+            # Get the position in the original content
+            start_in_cleaned = match.start()
+            # We need to find this math block in the original content
+            # For simplicity, we'll use the cleaned content for linting
             math_blocks.append((match.group(1), match.start(), match.end()))
         
         # Find inline math blocks ($...$) that aren't part of $$...$$
         # We need to be careful not to match the $ signs from $$
         inline_pattern = r'(?<!\$)\$(?!\$)(.*?)(?<!\$)\$(?!\$)'
-        for match in re.finditer(inline_pattern, content):
+        for match in re.finditer(inline_pattern, content_no_code):
             math_blocks.append((match.group(1), match.start(), match.end()))
+        
+        # Adjust positions to use cleaned content
+        # Update the lint_math_block to use cleaned content
+        self._content_for_linting = content_no_code
         
         return math_blocks
 
-    def lint_math_block(self, math_content: str, start_pos: int, content: str, filepath: str):
+    def lint_math_block(self, math_content: str, start_pos: int, filepath: str):
         """Lint a single math block for errors."""
-        # Get line number
-        line_num = content[:start_pos].count('\n') + 1
+        # Get line number from cleaned content
+        line_num = self._content_for_linting[:start_pos].count('\n') + 1
         
         for pattern, error_msg, validator in self.patterns:
             for match in re.finditer(pattern, math_content):
@@ -126,7 +142,7 @@ class LatexLinter:
         math_blocks = self.extract_math_blocks(content)
         
         for math_content, start_pos, _ in math_blocks:
-            self.lint_math_block(math_content, start_pos, content, str(filepath))
+            self.lint_math_block(math_content, start_pos, str(filepath))
         
         return len([e for e in self.errors if e['file'] == str(filepath)])
 
@@ -158,7 +174,7 @@ def main():
         'files',
         nargs='+',
         type=Path,
-        help='Markdown files to lint'
+        help='Markdown or Python files to lint'
     )
     parser.add_argument(
         '--fix',
@@ -176,8 +192,8 @@ def main():
             print(f"Warning: {filepath} does not exist", file=sys.stderr)
             continue
         
-        if filepath.suffix not in ['.md', '.markdown']:
-            print(f"Warning: {filepath} is not a markdown file", file=sys.stderr)
+        if filepath.suffix not in ['.md', '.markdown', '.py']:
+            print(f"Warning: {filepath} is not a markdown or Python file", file=sys.stderr)
             continue
         
         errors = linter.lint_file(filepath)
