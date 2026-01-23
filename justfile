@@ -17,9 +17,11 @@ install-vale:
         exit 0
     fi
     wget -O vale.tar.gz "https://github.com/errata-ai/vale/releases/download/v{{ vale_version }}/vale_{{ vale_version }}_Linux_64-bit.tar.gz"
+    wget -O vale_checksums.txt "https://github.com/errata-ai/vale/releases/download/v{{ vale_version }}/vale_{{ vale_version }}_checksums.txt"
+    grep "vale_{{ vale_version }}_Linux_64-bit.tar.gz" vale_checksums.txt | sha256sum --check -
     tar -xzf vale.tar.gz vale
     chmod +x vale
-    rm vale.tar.gz
+    rm vale.tar.gz vale_checksums.txt
     echo "vale v{{ vale_version }} installed successfully"
 
 # Sync vale styles (requires vale to be installed)
